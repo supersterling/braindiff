@@ -10,6 +10,7 @@ import {
   fetchBrainliftPage,
   mergeBrainliftData,
   parseBrainliftPage,
+  storeBrainliftData,
 } from "./actions"
 
 function CopyButton({
@@ -56,6 +57,8 @@ export default function DebugPage() {
     apiError?: string
     extractedItems?: string | JsonValue[]
     extractError?: string
+    saveError?: string
+    saveSuccess?: boolean
   }>({})
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [isLoadingData, setIsLoadingData] = React.useState<boolean>(false)
@@ -299,15 +302,71 @@ export default function DebugPage() {
             <h2 className="text-xl font-medium text-teal-800">
               Markdown Output
             </h2>
-            <CopyButton
-              text={
-                typeof result.extractedItems === "string"
-                  ? result.extractedItems
-                  : JSON.stringify(result.extractedItems, null, 2)
-              }
-              className="bg-teal-100 hover:bg-teal-200 text-teal-800 border-teal-300"
-            />
+            <div className="flex">
+              <Button
+                variant="noShadow"
+                size="sm"
+                onClick={async () => {
+                  if (
+                    !result.shareId ||
+                    !result.extractedItems ||
+                    typeof result.extractedItems !== "string"
+                  ) {
+                    setResult((prev) => ({
+                      ...prev,
+                      saveError: "Missing share ID or markdown content",
+                    }))
+                    return
+                  }
+
+                  const saveResult = await storeBrainliftData(
+                    result.shareId,
+                    result.extractedItems,
+                  )
+
+                  if (saveResult.error) {
+                    setResult((prev) => ({
+                      ...prev,
+                      saveError: saveResult.error.message,
+                      saveSuccess: false,
+                    }))
+                  } else {
+                    setResult((prev) => ({
+                      ...prev,
+                      saveError: undefined,
+                      saveSuccess: true,
+                    }))
+
+                    // Reset success message after a few seconds
+                    setTimeout(() => {
+                      setResult((prev) => ({
+                        ...prev,
+                        saveSuccess: false,
+                      }))
+                    }, 3000)
+                  }
+                }}
+                className="mr-2 bg-teal-100 hover:bg-teal-200 text-teal-800 border-teal-300"
+              >
+                {result.saveSuccess ? "Saved!" : "Save to DB"}
+              </Button>
+              <CopyButton
+                text={
+                  typeof result.extractedItems === "string"
+                    ? result.extractedItems
+                    : JSON.stringify(result.extractedItems, null, 2)
+                }
+                className="bg-teal-100 hover:bg-teal-200 text-teal-800 border-teal-300"
+              />
+            </div>
           </div>
+
+          {result.saveError && (
+            <div className="mb-4 p-3 bg-red-100 text-red-800 rounded border border-red-300">
+              {result.saveError}
+            </div>
+          )}
+
           <div className="overflow-auto max-h-[500px]">
             {typeof result.extractedItems === "string" ? (
               <div className="p-4 bg-teal-50 rounded border border-teal-200 text-sm text-teal-900">
