@@ -1,5 +1,7 @@
 "use server"
 
+import { db } from "@/db"
+import { brainlifts } from "@/db/schemas/workflowy"
 import { Errors, type Result } from "@/lib/errors"
 
 interface BrainliftPageResponse {
@@ -292,6 +294,47 @@ export async function mergeBrainliftData(
 
   return {
     data: conversionResult.data,
+    error: undefined,
+  }
+}
+
+/**
+ * Store Brainlift data in the database
+ */
+export async function storeBrainliftData(
+  shareId: string,
+  markdown: string,
+): Promise<Result<string, Error>> {
+  if (!shareId) {
+    return {
+      data: undefined,
+      error: new Error("Share ID is required and must be a string"),
+    }
+  }
+
+  if (!markdown) {
+    return {
+      data: undefined,
+      error: new Error("Markdown content is required and must be a string"),
+    }
+  }
+
+  const result = await Errors.try(
+    db.insert(brainlifts).values({
+      id: shareId,
+      md: markdown,
+    }),
+  )
+
+  if (result.error) {
+    return {
+      data: undefined,
+      error: Errors.wrap(result.error, "Failed to store Brainlift data"),
+    }
+  }
+
+  return {
+    data: shareId,
     error: undefined,
   }
 }
