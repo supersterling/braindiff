@@ -112,7 +112,7 @@
 - **Comments**: For the love of God, NEVER write comments of any kind, unless they are specifically TODO markers or ts/biome-ignore pragma comments.
 - **Migrations**: Never generate migrations; these are handled by a human developer.
 - **Package Management**:
-  - ALWAYS install missing packages with `bun i package-name` rather than using `@ts-ignore` or other workarounds.
+  - ALWAYS install missing packages with `bun install package-name` rather than using `@ts-ignore` or other workarounds.
 - **Type Safety**:
   - NEVER use explicit `any` or implicit `any` types.
   - Always create proper interfaces or type definitions, even for complex objects.
