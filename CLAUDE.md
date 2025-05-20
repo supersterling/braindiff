@@ -21,9 +21,6 @@
 - **Package Manager**: Bun
 - **Database ORM**: Drizzle ORM
 
-## Mapbox Integration
-- **IMPORTANT**: Always use `GeoJSONFeature` instead of deprecated `MapboxGeoJSONFeature` type when working with Mapbox features.
-
 ## Code Style Guidelines
 - **Naming**: Use camelCase for variables and functions, ensuring names are descriptive for clarity.
 - **Prefer Undefined Over Null**:
@@ -152,13 +149,13 @@
           throw Errors.wrap(submissionResult.error, `Failed to fetch submission ${submissionId}`);
         }
         const submission = submissionResult.data[0];
-        if (submission == null) {
+        if (submission == undefined) {
           // Our own logic error, throw directly
           throw new Error(`Submission with ID ${submissionId} not found`);
         }
 
         // Validate submission content
-        if (submission.content == null || submission.content.trim() === "") {
+        if (submission.content == undefined || submission.content.trim() === "") {
           throw new Error(`Submission ${submissionId} has no valid content`);
         }
 
@@ -195,9 +192,9 @@
       - `new Error` is used directly for our own validation logic (e.g., missing submission or empty content).
       - The process stops immediately upon error, ensuring invalid states don’t propagate.
 - **Nullish Checks**:
-  - When checking if a variable is nullish (either `undefined` or `null`), always use the double equal sign with `null`:
+  - When checking if a variable is nullish (either `undefined` or `null`), always use the double equal sign with `undefined`:
     ```typescript
-    if (someVar == null) {
+    if (someVar == undefined) {
       // Handle the nullish case
     }
     ```
@@ -205,8 +202,9 @@
   - **Avoid the following patterns:**
     - `!someVar`: This checks for falsy values, which include `0`, `''`, `false`, etc., not just `null` and `undefined`.
     - `!!someVar`: This converts the value to a boolean, again considering all falsy values.
+    - `someVar == null`: This is not preferred from a style perspective, since we use `undefined` over `null` for consistency.
     - `someVar === null`: This only checks for `null` and does not account for `undefined`.
-  - Using `someVar == null` ensures consistency and clarity in our codebase.
+  - Using `someVar == undefined` ensures consistency and clarity in our codebase.
 - **Data Fetching Pattern**:
   - ALWAYS colocate Drizzle queries with the server components that use them.
   - Define prepared statements at the top of the file as constants using the `.prepare()` method.
