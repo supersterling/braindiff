@@ -1,5 +1,5 @@
 import { db } from "@/db"
-import { Errors } from "@/errors"
+import { Errors } from "@/lib/errors"
 import { loadEnvConfig } from "@next/env"
 import { sql } from "drizzle-orm"
 
